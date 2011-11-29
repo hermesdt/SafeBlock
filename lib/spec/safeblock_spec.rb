@@ -5,10 +5,27 @@ require '../safeblock/safeblock_module'
 class A
   extend SafeblockModule
 
+  attr_accessor :timeout_finished
+
+  def initialize
+    @timeout_finished = false
+  end
+
   def raise_exception
     1/0
   end
   rescue_method :raise_exception
+
+  def throw_exception
+    1/0
+  end
+  rescue_method :throw_exception, :ignore_exception => true
+
+  def throw_timeout
+    sleep 3
+    @timeout_finished = true
+  end
+  rescue_method :throw_timeout, :timeout => 1
 end
 
 describe "SafeBlock behaviour" do
@@ -47,15 +64,14 @@ describe "SafeBlock behaviour" do
   #  a.threaded_method
   #end
 
-    it "anonymous object should raise exception" do
-    class A
-      def throw_exception
-        1/0
-      end
-      rescue_method :throw_exception, :ignore_exception => true
-    end
-
+  it "anonymous object should raise exception" do
     a = A.new
     lambda{a.throw_exception}.should raise_exception(ZeroDivisionError)
+  end
+
+  it "anonymous object should raise timeout exception" do
+    a = A.new
+    a.throw_timeout
+    a.timeout_finished.should be_false
   end
 end

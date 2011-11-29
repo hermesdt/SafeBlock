@@ -16,7 +16,7 @@ module SafeblockModule
     define_method :"#{method_name}" do |*args,&block|
     SafeBlock.start(options) do
       instance_eval do
-        send :"old_safeblock_#{method_name}", args, block
+        send :"old_safeblock_#{method_name}", *args, &block
       end
 
     end

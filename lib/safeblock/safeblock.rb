@@ -12,7 +12,7 @@ class SafeBlock
         begin
           block.call
         rescue Exception => e
-          return e if options[:ignore_exception]
+          raise e if options[:ignore_exception]
           options[:rescue_block].call(e) if options[:rescue_block].is_a? Proc
         end
       end
