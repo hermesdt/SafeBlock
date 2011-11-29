@@ -3,6 +3,8 @@ require 'timeout'
 class SafeBlock
   def self.start(options = {}, &block)
 
+    setup{} if @configuration.nil?
+
     options = @configuration.merge(options)
 
     proc = Proc.new do |options|
@@ -10,13 +12,14 @@ class SafeBlock
         begin
           block.call
         rescue Exception => e
+          return e if options[:ignore_exception]
           options[:rescue_block].call(e) if options[:rescue_block].is_a? Proc
         end
       end
     end
 
     if options[:threaded]
-      Thread.new{ proc.call }
+      Thread.new{ proc.call(options) }
     else
       proc.call(options)
     end
@@ -37,12 +40,13 @@ class SafeBlock
 
   class Configuration
 
-    VALUES = :timeout, :threaded, :rescue_block
+    VALUES = :timeout, :threaded, :rescue_block, :ignore_exception
     attr_accessor *VALUES
 
     def initialize
       @timeout = 0
       @threaded = false
+      @ignore_exception = false
     end
 
     def to_hash
