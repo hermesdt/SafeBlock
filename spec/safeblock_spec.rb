@@ -1,6 +1,6 @@
 require "rspec"
-require '../safeblock/safeblock'
-require '../safeblock/safeblock_module'
+require 'safeblock/safeblock'
+require 'safeblock/safeblock_module'
 
 class A
   extend SafeblockModule
