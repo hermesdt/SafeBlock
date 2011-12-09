@@ -20,6 +20,15 @@ class A
     1/0
   end
   rescue_method :throw_exception, :ignore_exception => true
+  
+  def block_no_throw_exception
+    yield
+  end
+  rescue_method :block_no_throw_exception
+
+  def block_throw_exception
+    yield
+  end
 
   def throw_timeout
     sleep 3
@@ -67,6 +76,16 @@ describe "SafeBlock behaviour" do
   it "anonymous object should raise exception" do
     a = A.new
     lambda{a.throw_exception}.should raise_exception(ZeroDivisionError)
+  end
+
+  it "anonymous object should not raise exception within a block" do
+    a = A.new
+    lambda{a.block_no_throw_exception{ 1/0 } }.should_not raise_exception(ZeroDivisionError)
+  end
+
+  it "anonymous object should raise exception within a block" do
+    a = A.new
+    lambda{a.block_throw_exception{ 1/0 } }.should raise_exception(ZeroDivisionError)
   end
 
   it "anonymous object should raise timeout exception" do
